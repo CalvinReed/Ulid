@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ulid", "Ulid\Ulid.csproj", "{54A32F1F-53B9-40D1-AABF-BD297596F92C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ulid.Tests", "Ulid.Tests\Ulid.Tests.csproj", "{CE4C91C5-7B7C-41B8-82F1-0816FD975418}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{54A32F1F-53B9-40D1-AABF-BD297596F92C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54A32F1F-53B9-40D1-AABF-BD297596F92C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54A32F1F-53B9-40D1-AABF-BD297596F92C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54A32F1F-53B9-40D1-AABF-BD297596F92C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE4C91C5-7B7C-41B8-82F1-0816FD975418}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE4C91C5-7B7C-41B8-82F1-0816FD975418}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE4C91C5-7B7C-41B8-82F1-0816FD975418}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE4C91C5-7B7C-41B8-82F1-0816FD975418}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

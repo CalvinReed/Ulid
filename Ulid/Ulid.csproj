@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <LangVersion>default</LangVersion>
+        <Nullable>enable</Nullable>
+        <Configurations>Debug;Release</Configurations>
+        <Platforms>AnyCPU</Platforms>
+        <AssemblyName>Ulid</AssemblyName>
+        <RootNamespace>CalvinReed</RootNamespace>
+        <Authors>Calvin Reed</Authors>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+      <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+      <DefineConstants>TRACECOREAPP</DefineConstants>
+      <PlatformTarget>AnyCPU</PlatformTarget>
+      <Optimize>true</Optimize>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+      <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+      <PlatformTarget>AnyCPU</PlatformTarget>
+    </PropertyGroup>
+
+</Project>
