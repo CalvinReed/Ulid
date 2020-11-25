@@ -1,39 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace CalvinReed.Tests
 {
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public class ParsingShould
     {
-        private readonly ITestOutputHelper output;
-
-        public ParsingShould(ITestOutputHelper output)
-        {
-            this.output = output;
-        }
-
-        [Fact]
-        public void BeFast()
-        {
-            const int count = 5_000_000;
-            var sw = Stopwatch.StartNew();
-            for (var i = 0; i < count; i++)
-            {
-                Ulid.Parse("00000000PRA1SETHE0MN1SS1AH");
-            }
-
-            sw.Stop();
-            var perMilli = count / sw.ElapsedMilliseconds;
-            var perMilliStr = $"{perMilli}";
-            Assert.True(perMilli > 1000, perMilliStr);
-            output.WriteLine(perMilliStr);
-        }
-
         [Fact]
         public void BeConsistent()
         {
