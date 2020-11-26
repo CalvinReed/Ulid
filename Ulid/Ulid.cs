@@ -9,9 +9,9 @@ namespace CalvinReed
     [JsonConverter(typeof(UlidJsonConverter))]
     public readonly struct Ulid : IEquatable<Ulid>, IComparable<Ulid>, IComparable
     {
-        internal const int BinarySize = sizeof(ulong) * 2;
-        internal const int TimestampGap = 8 * 2;
-        internal const int Base32Length = BinarySize * 8 / 5 + 1;
+        internal const int BinarySize = 16;
+        internal const int Base32Length = 26;
+        internal const int TimestampGap = 16;
 
         internal readonly ulong N0; // 6 bytes timestamp, 2 bytes randomness
         internal readonly ulong N1; // 8 bytes randomness
