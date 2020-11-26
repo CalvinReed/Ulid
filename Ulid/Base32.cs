@@ -14,7 +14,6 @@ namespace CalvinReed
 
         private const string Digits = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
         private static readonly IReadOnlyDictionary<char, int> Values;
-        private static readonly IReadOnlySet<char> FirstDigits;
 
         static Base32()
         {
@@ -37,10 +36,6 @@ namespace CalvinReed
             values.Add('L', 1);
 
             Values = values;
-            FirstDigits = values
-                .Where(x => x.Value <= 7)
-                .Select(x => x.Key)
-                .ToHashSet();
         }
 
         public static void Encode(ReadOnlySpan<byte> data, Span<char> digits)
@@ -52,17 +47,14 @@ namespace CalvinReed
 
         public static bool TryDecode(ReadOnlySpan<char> digits, Span<byte> data)
         {
-            var trimmed = digits.Trim();
-            if (trimmed.Length != Ulid.Base32Length) return false;
-            if (!FirstDigits.Contains(trimmed[0])) return false;
-            for (var i = 1; i < trimmed.Length; i++)
+            foreach (var digit in digits)
             {
-                if (!Values.ContainsKey(trimmed[i])) return false;
+                if (!Values.ContainsKey(digit)) return false;
             }
 
-            var k = trimmed.Length % DigitBlockSize;
-            var m = DecodeHead(trimmed[..k], data);
-            DecodeTail(trimmed[k..], data[m..]);
+            var k = digits.Length % DigitBlockSize;
+            var m = DecodeHead(digits[..k], data);
+            DecodeTail(digits[k..], data[m..]);
             return true;
         }
 

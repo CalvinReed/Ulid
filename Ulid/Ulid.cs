@@ -194,7 +194,11 @@ namespace CalvinReed
         public static Ulid? TryParse(ReadOnlySpan<char> str)
         {
             Span<byte> data = stackalloc byte[BinarySize + 1];
-            return Base32.TryDecode(str, data) ? new Ulid(data[1..]) : (Ulid?) null;
+            var success =
+                str.Length == Base32Length      // Check length,
+                && Base32.TryDecode(str, data)  // then check chars,
+                && data[0] == 0;                // then check for overflow.
+            return success ? new Ulid(data[1..]) : (Ulid?) null;
         }
 
         public static bool operator ==(Ulid left, Ulid right) => left.Equals(right);
