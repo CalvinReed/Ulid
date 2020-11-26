@@ -19,7 +19,7 @@ namespace CalvinReed.Tests
         public async Task BeConsistent()
         {
             var precision = new TimeSpan(TimeSpan.TicksPerMillisecond);
-            for (var i = 0; i < 100; i++)
+            for (var i = 0; i < 25; i++)
             {
                 var now = DateTime.UtcNow;
                 var ulid = Ulid.Create(now);
