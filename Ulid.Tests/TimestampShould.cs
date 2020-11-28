@@ -32,12 +32,11 @@ namespace CalvinReed.Tests
         [MemberData(nameof(GetDateTimes))]
         public void BeCorrect(DateTime dateTime)
         {
-            var utc = dateTime.ToUniversalTime();
             var random = Ulid.Create(dateTime);
             var blank = new Ulid(dateTime);
             var cleared = new Ulid(random);
-            Assert.Equal(utc, random.UtcTimestamp);
-            Assert.Equal(utc, blank.UtcTimestamp);
+            Assert.Equal(dateTime, random.UtcTimestamp);
+            Assert.Equal(dateTime, blank.UtcTimestamp);
             Assert.Equal(blank, cleared);
         }
 

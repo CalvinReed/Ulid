@@ -130,7 +130,7 @@ namespace CalvinReed
         }
 
         /// <summary>
-        /// Monotonically generates a <see cref="Ulid"/>.
+        /// Monotonically generates a <see cref="Ulid"/> from the current UTC time.
         /// </summary>
         /// <remarks>
         /// Monotonicity is not enforced between threads.

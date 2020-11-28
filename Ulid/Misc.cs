@@ -27,13 +27,12 @@ namespace CalvinReed
 
         public static long ToTimestamp(DateTime dateTime)
         {
-            var utc = dateTime.ToUniversalTime();
-            if (utc < DateTime.UnixEpoch)
+            if (dateTime < DateTime.UnixEpoch)
             {
                 throw new ArgumentOutOfRangeException(nameof(dateTime), dateTime, null);
             }
 
-            var timeSpan = utc - DateTime.UnixEpoch;
+            var timeSpan = dateTime - DateTime.UnixEpoch;
             return timeSpan.Ticks / TimeSpan.TicksPerMillisecond;
         }
 
