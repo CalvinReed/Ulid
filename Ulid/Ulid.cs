@@ -93,14 +93,7 @@ namespace CalvinReed
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var i0 = (int) N0;
-                var i1 = (int) N1;
-                var i2 = (int) (N0 >> 32);
-                var i3 = (int) (N1 >> 32);
-                return HashCode.Combine(i0, i1, i2, i3);
-            }
+            return (N0 ^ N1).GetHashCode();
         }
 
         public override bool Equals(object? obj)
