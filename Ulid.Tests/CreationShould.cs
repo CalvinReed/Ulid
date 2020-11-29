@@ -7,10 +7,10 @@ namespace CalvinReed.Tests
         [Fact]
         public void BeMonotonic()
         {
-            var before = Ulid.Next();
+            var before = Ulid.Create();
             for (var i = 0; i < 10_000; i++)
             {
-                var after = Ulid.Next();
+                var after = Ulid.Create();
                 Assert.True(before < after, $"{i} {before} {after}");
                 before = after;
             }

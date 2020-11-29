@@ -134,9 +134,9 @@ namespace CalvinReed
         /// <exception cref="OverflowException">
         /// On exceptionally rare occasions, too many generations within a single millisecond will cause an overflow.
         /// </exception>
-        public static Ulid Next()
+        public static Ulid Create()
         {
-            return UlidFactory.Instance.Next();
+            return UlidFactory.Instance.Create();
         }
 
         /// <summary>

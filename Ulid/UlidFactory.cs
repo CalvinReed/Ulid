@@ -13,7 +13,7 @@ namespace CalvinReed
 
         public static UlidFactory Instance => instance ??= new UlidFactory();
 
-        public Ulid Next()
+        public Ulid Create()
         {
             var timestamp = Misc.ToTimestamp(DateTime.UtcNow);
             state = timestamp == Misc.ToTimestamp(state)

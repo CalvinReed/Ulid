@@ -23,7 +23,7 @@ namespace CalvinReed.Tests
             var stopwatch = Stopwatch.StartNew();
             for (var i = 0; i < count; i++)
             {
-                Ulid.Next();
+                Ulid.Create();
             }
 
             stopwatch.Stop();
@@ -65,7 +65,7 @@ namespace CalvinReed.Tests
             var ids = new Ulid[10_000_000];
             for (var i = 0; i < ids.Length; i++)
             {
-                ids[i] = Ulid.Next();
+                ids[i] = Ulid.Create();
             }
 
             var hashes = new int[ids.Length];
