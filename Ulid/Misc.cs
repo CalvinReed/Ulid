@@ -4,7 +4,7 @@ namespace CalvinReed
 {
     internal static class Misc
     {
-        public static ulong ReadInt(ReadOnlySpan<byte> data)
+        public static ulong ReadULong(ReadOnlySpan<byte> data)
         {
             Span<byte> cut = stackalloc byte[sizeof(ulong)];
             data[..sizeof(ulong)].CopyTo(cut);
@@ -16,13 +16,21 @@ namespace CalvinReed
             return BitConverter.ToUInt64(cut);
         }
 
-        public static void WriteInt(Span<byte> data, ulong n)
+        public static void WriteULong(ulong n, Span<byte> data)
         {
             BitConverter.TryWriteBytes(data, n);
             if (BitConverter.IsLittleEndian)
             {
                 data[..sizeof(ulong)].Reverse();
             }
+        }
+
+        public static void WriteDigits(Ulid ulid, Span<char> digits)
+        {
+            Span<byte> data = stackalloc byte[Ulid.BinarySize];
+            WriteULong(ulid.N0, data);
+            WriteULong(ulid.N1, data[sizeof(ulong)..]);
+            Base32.Encode(data, digits);
         }
 
         public static long ToTimestamp(DateTime dateTime)
@@ -39,14 +47,6 @@ namespace CalvinReed
         public static long ToTimestamp(Ulid ulid)
         {
             return (long) (ulid.N0 >> Ulid.TimestampGap);
-        }
-
-        public static void WriteDigits(Ulid ulid, Span<char> digits)
-        {
-            Span<byte> data = stackalloc byte[Ulid.BinarySize];
-            WriteInt(data, ulid.N0);
-            WriteInt(data[sizeof(ulong)..], ulid.N1);
-            Base32.Encode(data, digits);
         }
     }
 }

@@ -67,8 +67,8 @@ namespace CalvinReed
                 throw new ArgumentOutOfRangeException(nameof(data), data.Length, "Input not large enough");
             }
 
-            N0 = Misc.ReadInt(data);
-            N1 = Misc.ReadInt(data[sizeof(ulong)..]);
+            N0 = Misc.ReadULong(data);
+            N1 = Misc.ReadULong(data[sizeof(ulong)..]);
         }
 
         /// <summary>

@@ -25,7 +25,7 @@ namespace CalvinReed
         internal static Ulid Create(long timestamp)
         {
             Span<byte> data = stackalloc byte[Ulid.BinarySize];
-            Misc.WriteInt(data, (ulong) timestamp << Ulid.TimestampGap);
+            Misc.WriteULong((ulong) timestamp << Ulid.TimestampGap, data);
             RandomNumberGenerator.Fill(data[6..]);
             return new Ulid(data);
         }
