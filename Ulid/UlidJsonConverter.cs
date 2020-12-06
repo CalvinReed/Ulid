@@ -14,9 +14,7 @@ namespace CalvinReed
 
         public override void Write(Utf8JsonWriter writer, Ulid value, JsonSerializerOptions options)
         {
-            Span<char> digits = stackalloc char[Ulid.Base32Length];
-            Misc.WriteDigits(value, digits);
-            writer.WriteStringValue(digits);
+            value.WriteDigits(writer);
         }
     }
 }

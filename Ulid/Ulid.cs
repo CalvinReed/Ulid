@@ -1,20 +1,18 @@
 ﻿using System;
-using System.Text.Json.Serialization;
 
 namespace CalvinReed
 {
     /// <summary>
     /// Represents a universally unique, lexicographically sortable identifier.
     /// </summary>
-    [JsonConverter(typeof(UlidJsonConverter))]
-    public readonly struct Ulid : IEquatable<Ulid>, IComparable<Ulid>, IComparable
+    public readonly partial struct Ulid
     {
-        internal const int BinarySize = 16;
-        internal const int Base32Length = 26;
-        internal const int TimestampGap = 16;
+        private const int BinarySize = 16;
+        private const int Base32Length = 26;
+        private const int TimestampGap = 16;
 
-        internal readonly ulong N0; // 6 bytes timestamp, 2 bytes randomness
-        internal readonly ulong N1; // 8 bytes randomness
+        private readonly ulong n0; // 6 bytes timestamp, 2 bytes randomness
+        private readonly ulong n1; // 8 bytes randomness
 
         /// <summary>
         /// Constructs a <see cref="Ulid"/> with a blank randomness component.
@@ -25,8 +23,8 @@ namespace CalvinReed
         /// </exception>
         public Ulid(DateTime dateTime)
         {
-            N0 = (ulong) Misc.ToTimestamp(dateTime) << TimestampGap;
-            N1 = 0;
+            n0 = (ulong) Misc.ToTimestamp(dateTime) << TimestampGap;
+            n1 = 0;
         }
 
         /// <summary>
@@ -35,8 +33,8 @@ namespace CalvinReed
         /// <param name="ulid">A <see cref="Ulid"/> with the desired timestamp.</param>
         public Ulid(Ulid ulid)
         {
-            N0 = ulid.N0 & 0xFFFF_FFFF_FFFF_0000;
-            N1 = 0;
+            n0 = ulid.n0 & 0xFFFF_FFFF_FFFF_0000;
+            n1 = 0;
         }
 
         /// <summary>
@@ -44,10 +42,10 @@ namespace CalvinReed
         /// </summary>
         /// <param name="n0">6 bytes timestamp, 2 bytes randomness</param>
         /// <param name="n1">8 bytes randomness</param>
-        public Ulid(ulong n0, ulong n1)
+        private Ulid(ulong n0, ulong n1)
         {
-            N0 = n0;
-            N1 = n1;
+            this.n0 = n0;
+            this.n1 = n1;
         }
 
         /// <summary>
@@ -60,15 +58,15 @@ namespace CalvinReed
         /// <exception cref="ArgumentOutOfRangeException">
         /// Input is not large enough to make a <see cref="Ulid"/>.
         /// </exception>
-        public Ulid(ReadOnlySpan<byte> data)
+        private Ulid(ReadOnlySpan<byte> data)
         {
             if (data.Length < BinarySize)
             {
                 throw new ArgumentOutOfRangeException(nameof(data), data.Length, "Input not large enough");
             }
 
-            N0 = Misc.ReadULong(data);
-            N1 = Misc.ReadULong(data[sizeof(ulong)..]);
+            n0 = Misc.ReadULong(data);
+            n1 = Misc.ReadULong(data[sizeof(ulong)..]);
         }
 
         /// <summary>
@@ -78,127 +76,11 @@ namespace CalvinReed
         {
             get
             {
-                var timestamp = Misc.ToTimestamp(this);
-                var ticks = timestamp * TimeSpan.TicksPerMillisecond;
+                var ticks = Timestamp * TimeSpan.TicksPerMillisecond;
                 return DateTime.UnixEpoch.AddTicks(ticks);
             }
         }
 
-        public override string ToString()
-        {
-            Span<char> digits = stackalloc char[Base32Length];
-            Misc.WriteDigits(this, digits);
-            return new string(digits);
-        }
-
-        public override int GetHashCode()
-        {
-            return (N0 ^ N1).GetHashCode();
-        }
-
-        public override bool Equals(object? obj)
-        {
-            return obj is Ulid other && Equals(other);
-        }
-
-        public bool Equals(Ulid other)
-        {
-            return N1 == other.N1 && N0 == other.N0;
-        }
-
-        public int CompareTo(Ulid other)
-        {
-            var comparison = N0.CompareTo(other.N0);
-            return comparison != 0 ? comparison : N1.CompareTo(other.N1);
-        }
-
-        public int CompareTo(object? obj)
-        {
-            return obj switch
-            {
-                null => 1,
-                Ulid other => CompareTo(other),
-                _ => throw new ArgumentException($"Object must be of type {nameof(Ulid)}")
-            };
-        }
-
-        /// <summary>
-        /// Monotonically generates a <see cref="Ulid"/> from the current UTC time.
-        /// </summary>
-        /// <remarks>
-        /// Monotonicity is not enforced between threads.
-        /// </remarks>
-        /// <returns>
-        /// A monotonically generated <see cref="Ulid"/>.
-        /// </returns>
-        /// <exception cref="OverflowException">
-        /// On exceptionally rare occasions, too many generations within a single millisecond will cause an overflow.
-        /// </exception>
-        public static Ulid Create()
-        {
-            return UlidFactory.Instance.Create();
-        }
-
-        /// <summary>
-        /// Randomly generates a <see cref="Ulid"/>.
-        /// </summary>
-        /// <param name="dateTime">
-        /// The timestamp of the result.
-        /// </param>
-        /// <returns>
-        /// A randomly generated <see cref="Ulid"/>.
-        /// </returns>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Input predates the Unix epoch.
-        /// </exception>
-        public static Ulid Create(DateTime dateTime)
-        {
-            var timestamp = Misc.ToTimestamp(dateTime);
-            return UlidFactory.Create(timestamp);
-        }
-
-        /// <summary>
-        /// Parses the input as a <see cref="Ulid"/>.
-        /// </summary>
-        /// <param name="str">
-        /// The span of characters to be parsed.
-        /// </param>
-        /// <returns>
-        /// The parsed <see cref="Ulid"/>.
-        /// </returns>
-        /// <exception cref="FormatException">
-        /// The input is not valid.
-        /// </exception>
-        public static Ulid Parse(ReadOnlySpan<char> str)
-        {
-            return TryParse(str) ?? throw new FormatException($"Input is not a valid {nameof(Ulid)}");
-        }
-
-        /// <summary>
-        /// Attempts to parse the input as a <see cref="Ulid"/>.
-        /// </summary>
-        /// <param name="str">
-        /// The characters to be parsed.
-        /// </param>
-        /// <returns>
-        /// If input is valid, the parsed <see cref="Ulid"/>.
-        /// Otherwise, <c>null</c>.
-        /// </returns>
-        public static Ulid? TryParse(ReadOnlySpan<char> str)
-        {
-            Span<byte> data = stackalloc byte[BinarySize + 1];
-            var success =
-                str.Length == Base32Length      // Check length,
-                && Base32.TryDecode(str, data)  // then check chars,
-                && data[0] == 0;                // then check for overflow.
-            return success ? new Ulid(data[1..]) : (Ulid?) null;
-        }
-
-        public static bool operator ==(Ulid left, Ulid right) => left.Equals(right);
-        public static bool operator !=(Ulid left, Ulid right) => !left.Equals(right);
-        public static bool operator <(Ulid left, Ulid right) => left.CompareTo(right) < 0;
-        public static bool operator >(Ulid left, Ulid right) => left.CompareTo(right) > 0;
-        public static bool operator <=(Ulid left, Ulid right) => left.CompareTo(right) <= 0;
-        public static bool operator >=(Ulid left, Ulid right) => left.CompareTo(right) >= 0;
+        internal long Timestamp => (long) (n0 >> TimestampGap);
     }
 }
