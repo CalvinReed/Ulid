@@ -72,14 +72,7 @@ namespace CalvinReed
         /// <summary>
         /// The encoded timestamp as a UTC <see cref="DateTime"/>.
         /// </summary>
-        public DateTime UtcTimestamp
-        {
-            get
-            {
-                var ticks = Timestamp * TimeSpan.TicksPerMillisecond;
-                return DateTime.UnixEpoch.AddTicks(ticks);
-            }
-        }
+        public DateTime UtcTimestamp => DateTime.UnixEpoch.AddTicks(Timestamp * TimeSpan.TicksPerMillisecond);
 
         internal long Timestamp => (long) (n0 >> TimestampGap);
     }
