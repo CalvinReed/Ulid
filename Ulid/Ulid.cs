@@ -19,7 +19,7 @@ namespace CalvinReed
         /// </summary>
         /// <param name="dateTime">The desired timestamp.</param>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Input predates the Unix epoch.
+        /// <see cref="dateTime"/> predates the Unix epoch.
         /// </exception>
         public Ulid(DateTime dateTime)
         {
@@ -56,7 +56,7 @@ namespace CalvinReed
         /// </remarks>
         /// <param name="data">The bytes that will make up the <see cref="Ulid"/>.</param>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Input is not large enough to make a <see cref="Ulid"/>.
+        /// <see cref="data"/> is not large enough to make a <see cref="Ulid"/>.
         /// </exception>
         private Ulid(ReadOnlySpan<byte> data)
         {

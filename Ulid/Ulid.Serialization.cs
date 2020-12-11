@@ -7,6 +7,13 @@ namespace CalvinReed
     [JsonConverter(typeof(UlidJsonConverter))]
     partial struct Ulid
     {
+        public override string ToString()
+        {
+            Span<char> digits = stackalloc char[Base32Length];
+            WriteDigits(digits);
+            return new string(digits);
+        }
+
         /// <summary>
         /// Parses the input as a <see cref="Ulid"/>.
         /// </summary>

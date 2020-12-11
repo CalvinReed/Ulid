@@ -32,7 +32,7 @@ namespace CalvinReed
         /// A randomly generated <see cref="Ulid"/>.
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Input predates the Unix epoch.
+        /// <see cref="dateTime"/> predates the Unix epoch.
         /// </exception>
         public static Ulid Create(DateTime dateTime)
         {

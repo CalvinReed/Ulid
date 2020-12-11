@@ -4,13 +4,6 @@ namespace CalvinReed
 {
     partial struct Ulid : IEquatable<Ulid>, IComparable<Ulid>, IComparable
     {
-        public override string ToString()
-        {
-            Span<char> digits = stackalloc char[Base32Length];
-            WriteDigits(digits);
-            return new string(digits);
-        }
-
         public override int GetHashCode()
         {
             return (n0 ^ n1).GetHashCode();
