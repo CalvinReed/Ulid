@@ -37,27 +37,12 @@ namespace CalvinReed
             n1 = 0;
         }
 
-        /// <summary>
-        /// Constructs an arbitrary <see cref="Ulid"/>.
-        /// </summary>
-        /// <param name="n0">6 bytes timestamp, 2 bytes randomness</param>
-        /// <param name="n1">8 bytes randomness</param>
         private Ulid(ulong n0, ulong n1)
         {
             this.n0 = n0;
             this.n1 = n1;
         }
 
-        /// <summary>
-        /// Constructs an arbitrary <see cref="Ulid"/>.
-        /// </summary>
-        /// <remarks>
-        /// Only the first 16 bytes are used; any extras are ignored.
-        /// </remarks>
-        /// <param name="data">The bytes that will make up the <see cref="Ulid"/>.</param>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <see cref="data"/> is not large enough to make a <see cref="Ulid"/>.
-        /// </exception>
         private Ulid(ReadOnlySpan<byte> data)
         {
             if (data.Length < BinarySize)
