@@ -28,7 +28,7 @@ namespace CalvinReed.Tests
         [InlineData("7ZZZZZZZZZZZZZZZZZZZZZZZZZ")]
         public void BeCorrect(string str)
         {
-            var ulid = Ulid.TryParse(str);
+            var ulid = Ulid.TryParse(str.AsSpan());
             Assert.Equal(str, ulid?.ToString());
         }
 
@@ -74,6 +74,7 @@ namespace CalvinReed.Tests
         public void ThrowFormatException(string str)
         {
             Assert.Throws<FormatException>(() => Ulid.Parse(str));
+            Assert.Throws<FormatException>(() => Ulid.Parse(str.AsSpan()));
         }
 
         public static IEnumerable<object[]> GetInvalidLength()
