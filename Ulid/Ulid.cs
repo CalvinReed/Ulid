@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 
 namespace CalvinReed;
 
@@ -50,8 +51,8 @@ public readonly partial struct Ulid
             throw new ArgumentOutOfRangeException(nameof(data), data.Length, "Input not large enough");
         }
 
-        n0 = Misc.ReadULong(data);
-        n1 = Misc.ReadULong(data[sizeof(ulong)..]);
+        n0 = BinaryPrimitives.ReadUInt64BigEndian(data);
+        n1 = BinaryPrimitives.ReadUInt64BigEndian(data[sizeof(ulong)..]);
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -24,8 +25,8 @@ partial struct Ulid
     private void WriteDigits(Span<char> digits)
     {
         Span<byte> data = stackalloc byte[BinarySize];
-        Misc.WriteULong(n0, data);
-        Misc.WriteULong(n1, data[sizeof(ulong)..]);
+        BinaryPrimitives.WriteUInt64BigEndian(data, n0);
+        BinaryPrimitives.WriteUInt64BigEndian(data[sizeof(ulong)..], n1);
         Base32.Encode(data, digits);
     }
 

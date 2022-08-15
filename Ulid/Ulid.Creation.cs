@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Security.Cryptography;
 
 namespace CalvinReed;
@@ -58,7 +59,7 @@ partial struct Ulid
     internal static Ulid Create(long timestamp)
     {
         Span<byte> data = stackalloc byte[BinarySize];
-        Misc.WriteULong((ulong) timestamp << TimestampGap, data);
+        BinaryPrimitives.WriteInt64BigEndian(data, timestamp << TimestampGap);
         RandomNumberGenerator.Fill(data[6..]);
         return new Ulid(data);
     }
