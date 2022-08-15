@@ -37,7 +37,7 @@ public class PerformanceOf
         var stopwatch = Stopwatch.StartNew();
         for (var i = 0; i < count; i++)
         {
-            Ulid.Create(DateTime.UtcNow);
+            Ulid.Create(DateTimeOffset.UtcNow);
         }
 
         stopwatch.Stop();

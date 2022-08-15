@@ -22,9 +22,9 @@ public readonly partial struct Ulid
     /// <exception cref="ArgumentOutOfRangeException">
     /// <see cref="dateTime"/> predates the Unix epoch.
     /// </exception>
-    public Ulid(DateTime dateTime)
+    public Ulid(DateTimeOffset dateTime)
     {
-        n0 = (ulong) Misc.ToTimestamp(dateTime) << TimestampGap;
+        n0 = (ulong) ToTimestamp(dateTime) << TimestampGap;
         n1 = 0;
     }
 
@@ -58,7 +58,18 @@ public readonly partial struct Ulid
     /// <summary>
     /// The encoded timestamp as a UTC <see cref="DateTime"/>.
     /// </summary>
-    public DateTime UtcTimestamp => DateTime.UnixEpoch.AddTicks(Timestamp * TimeSpan.TicksPerMillisecond);
+    public DateTimeOffset UtcTimestamp => DateTimeOffset.UnixEpoch.AddTicks(Timestamp * TimeSpan.TicksPerMillisecond);
 
     internal long Timestamp => (long) (n0 >> TimestampGap);
+
+    internal static long ToTimestamp(DateTimeOffset dateTime)
+    {
+        var milliseconds = dateTime.ToUnixTimeMilliseconds();
+        if (milliseconds is < 0 or >= 1L << 48)
+        {
+            throw new ArgumentOutOfRangeException(nameof(dateTime), dateTime, null);
+        }
+
+        return milliseconds;
+    }
 }

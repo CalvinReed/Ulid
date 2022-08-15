@@ -13,7 +13,7 @@ public class ParsingShould
     {
         for (var i = 0; i < 10_000; i++)
         {
-            var ulid = Ulid.Create(DateTime.UtcNow);
+            var ulid = Ulid.Create(DateTimeOffset.UtcNow);
             var str = ulid.ToString();
             var parsed = Ulid.Parse(str);
             Assert.Equal(ulid, parsed);

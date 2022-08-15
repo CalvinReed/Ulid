@@ -35,9 +35,9 @@ partial struct Ulid
     /// <exception cref="ArgumentOutOfRangeException">
     /// <see cref="dateTime"/> predates the Unix epoch.
     /// </exception>
-    public static Ulid Create(DateTime dateTime)
+    public static Ulid Create(DateTimeOffset dateTime)
     {
-        var timestamp = Misc.ToTimestamp(dateTime);
+        var timestamp = ToTimestamp(dateTime);
         return Create(timestamp);
     }
 

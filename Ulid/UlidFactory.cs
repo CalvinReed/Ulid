@@ -14,7 +14,7 @@ internal class UlidFactory
 
     public Ulid Create()
     {
-        var timestamp = Misc.ToTimestamp(DateTime.UtcNow);
+        var timestamp = Ulid.ToTimestamp(DateTimeOffset.UtcNow);
         state = timestamp == state.Timestamp
             ? Ulid.Increment(state)
             : Ulid.Create(timestamp);

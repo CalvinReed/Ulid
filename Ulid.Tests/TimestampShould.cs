@@ -10,7 +10,7 @@ public class TimestampShould
     [Fact]
     public void RejectPreEpoch()
     {
-        var preEpoch = DateTime.UnixEpoch - TimeSpan.FromMilliseconds(1);
+        var preEpoch = DateTimeOffset.UnixEpoch - TimeSpan.FromMilliseconds(1);
         Assert.Throws<ArgumentOutOfRangeException>(() => new Ulid(preEpoch));
         Assert.Throws<ArgumentOutOfRangeException>(() => Ulid.Create(preEpoch));
     }
@@ -21,16 +21,16 @@ public class TimestampShould
         var precision = new TimeSpan(TimeSpan.TicksPerMillisecond);
         for (var i = 0; i < 25; i++)
         {
-            var now = DateTime.UtcNow;
+            var now = DateTimeOffset.UtcNow;
             var ulid = Ulid.Create(now);
-            Assert.Equal(now, ulid.UtcTimestamp, precision);
+            Assert.Equal(now.UtcDateTime, ulid.UtcTimestamp.DateTime, precision);
             await Task.Delay(20);
         }
     }
 
     [Theory]
     [MemberData(nameof(GetDateTimes))]
-    public void BeCorrect(DateTime dateTime)
+    public void BeCorrect(DateTimeOffset dateTime)
     {
         var random = Ulid.Create(dateTime);
         var blank = new Ulid(dateTime);
@@ -42,10 +42,9 @@ public class TimestampShould
 
     public static IEnumerable<object[]> GetDateTimes()
     {
-        yield return new object[] {DateTime.UnixEpoch};
-        yield return new object[] {new DateTime(1998, 02, 24, 18, 05, 00, DateTimeKind.Local)};
-        yield return new object[] {new DateTime(1998, 02, 24, 18, 05, 00, DateTimeKind.Unspecified)};
-        yield return new object[] {new DateTime(2013, 12, 11, 10, 09, 08, 765, DateTimeKind.Utc)};
-        yield return new object[] {new DateTime(9999, 12, 31, 23, 59, 59, 999, DateTimeKind.Utc)};
+        yield return new object[] {DateTimeOffset.UnixEpoch};
+        yield return new object[] {new DateTimeOffset(1998, 02, 24, 18, 05, 00, TimeZoneInfo.Local.BaseUtcOffset)};
+        yield return new object[] {new DateTimeOffset(2013, 12, 11, 10, 09, 08, 765, TimeZoneInfo.Utc.BaseUtcOffset)};
+        yield return new object[] {new DateTimeOffset(9999, 12, 31, 23, 59, 59, 999, TimeZoneInfo.Utc.BaseUtcOffset)};
     }
 }
