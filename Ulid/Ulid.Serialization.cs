@@ -71,12 +71,9 @@ partial struct Ulid
     /// </returns>
     public static Ulid? TryParse(ReadOnlySpan<char> input)
     {
-        Span<byte> data = stackalloc byte[BinarySize + 1];
+        Span<byte> data = stackalloc byte[BinarySize];
         var trimmed = input.Trim();
-        var success =
-            trimmed.Length == Base32Length     // Check length,
-            && Base32.TryDecode(trimmed, data) // then check chars,
-            && data[0] == 0;                   // then check for overflow.
-        return success ? new Ulid(data[1..]) : (Ulid?) null;
+        var success = Base32.TryDecode(trimmed, data);
+        return success ? new Ulid(data) : null;
     }
 }

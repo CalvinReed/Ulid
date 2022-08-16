@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace CalvinReed;
 
 internal static class Base32
 {
-    private const int BitsPerByte = 8;
-    private const int BitsPerDigit = 5;
-    private const int BitDifference = BitsPerByte - BitsPerDigit;
-    private const int DataBlockSize = BitsPerDigit;
-    private const int DigitBlockSize = BitsPerByte;
+    private const int DataFullLength = 16;
+    private const int DigitFullLength = 26;
+    private const int DataBlockLength = 5;
+    private const int DigitBlockLength = 8;
 
     private const string Digits = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
     private static readonly IReadOnlyDictionary<char, int> Values;
@@ -39,129 +40,91 @@ internal static class Base32
 
     public static void Encode(ReadOnlySpan<byte> data, Span<char> digits)
     {
-        var i = data.Length % DataBlockSize;
-        var k = EncodeHead(data[..i], digits);
-        EncodeTail(data[i..], digits[k..]);
+        Debug.Assert(data.Length == DataFullLength);
+        Debug.Assert(digits.Length == DigitFullLength);
+        digits[0] = Digits[data[0] >> 5];
+        digits[1] = Digits[data[0] & 0b11111];
+        EncodeBlock(data[01..06], digits[02..10]);
+        EncodeBlock(data[06..11], digits[10..18]);
+        EncodeBlock(data[11..16], digits[18..26]);
     }
 
     public static bool TryDecode(ReadOnlySpan<char> digits, Span<byte> data)
     {
-        foreach (var digit in digits)
+        try
         {
-            if (!Values.ContainsKey(digit)) return false;
+            return TryDecodeImpl(digits, data);
+        }
+        catch (KeyNotFoundException)
+        {
+            return false;
+        }
+    }
+
+    private static bool TryDecodeImpl(ReadOnlySpan<char> digits, Span<byte> data)
+    {
+        Debug.Assert(data.Length == DataFullLength);
+        if (digits.Length != DigitFullLength)
+        {
+            return false;
         }
 
-        var k = digits.Length % DigitBlockSize;
-        var m = DecodeHead(digits[..k], data);
-        DecodeTail(digits[k..], data[m..]);
+        var firstValue = Values[digits[0]];
+        if (firstValue > 0b111)
+        {
+            return false;
+        }
+
+        data.Clear();
+        data[0] |= (byte)(firstValue << 5);
+        data[0] |= (byte)Values[digits[1]];
+        DecodeBlock(digits[02..10], data[01..06]);
+        DecodeBlock(digits[10..18], data[06..11]);
+        DecodeBlock(digits[18..26], data[11..16]);
         return true;
     }
 
-    private static int EncodeHead(ReadOnlySpan<byte> head, Span<char> encoded)
+    private static void EncodeBlock(ReadOnlySpan<byte> data, Span<char> digits)
     {
-        if (head.IsEmpty)
+        Debug.Assert(data.Length == DataBlockLength);
+        Debug.Assert(digits.Length == DigitBlockLength);
+        var bits = ReadFromBlock(data);
+        for (var i = DigitBlockLength - 1; i >= 0; i--)
         {
-            return 0;
-        }
-
-        var len = head.Length * BitsPerByte / BitsPerDigit + 1;
-        Span<byte> padded = stackalloc byte[DataBlockSize];
-        Span<char> output = stackalloc char[DigitBlockSize];
-        padded[..^head.Length].Clear();
-        head.CopyTo(padded[^head.Length..]);
-        EncodeBlock(padded, output);
-        output[^len..].CopyTo(encoded);
-        return len;
-    }
-
-    private static int DecodeHead(ReadOnlySpan<char> head, Span<byte> decoded)
-    {
-        if (head.IsEmpty)
-        {
-            return 0;
-        }
-
-        var len = head.Length * BitsPerDigit / BitsPerByte + 1;
-        Span<char> padded = stackalloc char[DigitBlockSize];
-        Span<byte> output = stackalloc byte[DataBlockSize];
-        padded[..^head.Length].Fill(Digits[0]);
-        head.CopyTo(padded[^head.Length..]);
-        DecodeBlock(padded, output);
-        output[^len..].CopyTo(decoded);
-        return len;
-    }
-
-    private static void EncodeTail(ReadOnlySpan<byte> tail, Span<char> encoded)
-    {
-        while (!tail.IsEmpty)
-        {
-            EncodeBlock(tail, encoded);
-            tail = tail[DataBlockSize..];
-            encoded = encoded[DigitBlockSize..];
+            digits[i] = Digits[(int)(bits & 0b11111)];
+            bits >>= 5;
         }
     }
 
-    private static void DecodeTail(ReadOnlySpan<char> tail, Span<byte> decoded)
+    private static void DecodeBlock(ReadOnlySpan<char> digits, Span<byte> data)
     {
-        while (!tail.IsEmpty)
+        Debug.Assert(digits.Length == DigitBlockLength);
+        Debug.Assert(data.Length == DataBlockLength);
+        var bits = 0UL;
+        foreach (var digit in digits)
         {
-            DecodeBlock(tail, decoded);
-            tail = tail[DigitBlockSize..];
-            decoded = decoded[DataBlockSize..];
+            bits <<= 5;
+            bits |= (byte)Values[digit];
         }
+
+        WriteToBlock(bits, data);
     }
 
-    private static void EncodeBlock(ReadOnlySpan<byte> block, Span<char> encoded)
+    private static ulong ReadFromBlock(ReadOnlySpan<byte> data)
     {
-        for (var i = 0; i < DigitBlockSize; i++)
-        {
-            var start = i * BitsPerDigit / BitsPerByte;
-            var offset = i * BitsPerDigit % BitsPerByte;
-            encoded[i] = GetDigit(block[start..], offset);
-        }
+        Debug.Assert(data.Length == DataBlockLength);
+        Span<byte> bytes = stackalloc byte[sizeof(ulong)];
+        bytes.Clear();
+        data.CopyTo(bytes[^DataBlockLength..]);
+        return BinaryPrimitives.ReadUInt64BigEndian(bytes);
     }
 
-    private static void DecodeBlock(ReadOnlySpan<char> block, Span<byte> decoded)
+    private static void WriteToBlock(ulong bits, Span<byte> data)
     {
-        decoded[..DataBlockSize].Clear();
-        for (var i = 0; i < DigitBlockSize; i++)
-        {
-            var start = i * BitsPerDigit / BitsPerByte;
-            var offset = i * BitsPerDigit % BitsPerByte;
-            SetDigit(decoded[start..], offset, block[i]);
-        }
-    }
-
-    private static char GetDigit(ReadOnlySpan<byte> data, int offset)
-    {
-        if (offset <= BitDifference)
-        {
-            var value = data[0] >> (BitDifference - offset);
-            return Digits[value & 0x1F];
-        }
-        else
-        {
-            var left = data[0] << (offset - BitDifference);
-            var right = data[1] >> BitDifference >> (BitsPerByte - offset);
-            var value = left | right;
-            return Digits[value & 0x1F];
-        }
-    }
-
-    private static void SetDigit(Span<byte> data, int offset, char digit)
-    {
-        var value = Values[digit];
-        if (offset <= BitDifference)
-        {
-            var shifted = value << (BitDifference - offset);
-            data[0] |= (byte) shifted;
-        }
-        else
-        {
-            var left = value >> (offset - BitDifference);
-            var right = value << BitDifference << (BitsPerByte - offset);
-            data[0] |= (byte) left;
-            data[1] |= unchecked((byte) right);
-        }
+        Debug.Assert(bits <= 0xFF_FFFF_FFFF);
+        Debug.Assert(data.Length == DataBlockLength);
+        Span<byte> bytes = stackalloc byte[sizeof(ulong)];
+        BinaryPrimitives.WriteUInt64BigEndian(bytes, bits);
+        bytes[^DataBlockLength..].CopyTo(data);
     }
 }
